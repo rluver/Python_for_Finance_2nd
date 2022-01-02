@@ -68,7 +68,7 @@ class Liquidity:
 
         x_(2, t) = sign(R_t - R_(f, t) * P_t * volume)
                    P_t: the stock price
-                   
+
         beta2: Pastor and Stambaugh's liquidity'
         '''
         returns = np.array([x/y - 1 for x, y in zip(MSFT['Adj Close'][1:], MSFT['Adj Close'][:-1])])
@@ -97,3 +97,15 @@ class Liquidity:
         results = sm.OLS(y, x).fit()
 
         return results
+
+
+def fama_beth_regression(data: pd.DataFrame):
+
+    data = sm.add_constant(data)
+    n = np.size(data)
+    x = np.reshape(data, [int(n / len(data.columns)), len(data.columns)])
+    y = data.returns
+
+    results = sm.OLS(y, x).fit()
+
+    return results
