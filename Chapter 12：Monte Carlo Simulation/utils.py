@@ -75,5 +75,5 @@ class AnnualReturnsDistribution:
         plt.ylabel('Frequency')
         mean_annual = round(np.mean(np.array(self.annual_returns)), 4)
         plt.figtext(0.63, 0.8, f'mean annual={mean_annual}')
-        plt.hist(self.estimated_returns, 50, normed=True)
+        plt.hist(self.estimated_returns, 50)
         plt.show()
