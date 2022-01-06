@@ -6,6 +6,7 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 from scipy import sqrt, exp, log, pi
 import pandas_datareader.data as web
+from tqdm import tqdm
 
 
 def bootstrap(data, n_obs: int, replacement=None) -> list:
@@ -79,10 +80,6 @@ class AnnualReturnsDistribution:
         plt.show()
 
 
-class MonteCarloSimulation:
-    pass
-
-
 class StockPriceMovement:
     """
 
@@ -149,3 +146,49 @@ class StockPriceMovement:
             plt.hist([x[-1] for x in self.S])
 
         plt.show()
+
+
+class BlackScholesMerton:
+    """
+
+    BlackScholesMerton class is to estimate call price.
+
+    Below is an explanation for arguments in this class.
+
+    S0: stock price at time zero
+    X: exercise price
+    T: maturity date (in years)
+    r: risk-free rate
+    sigma: annualized volatility
+    n_steps: number of steps
+    n_simulations: number of simulation
+
+    """
+
+    def __init__(self, S0: float, X: float, T: float, r: float,
+                 sigma: float, n_steps: int, n_simulations: int):
+        self.S0 = S0
+        self.X = X
+        self.T = T
+        self.r = r
+        self.sigma = sigma
+        self.n_steps = n_steps
+        self.n_simulations = n_simulations
+
+    def get_estimated_call_price(self) -> float:
+        dt = self.T / self.n_steps
+        call = np.zeros(self.n_simulations)
+
+        for n in tqdm(range(self.n_simulations)):
+            s_T = self.S0
+            for _ in range(self.n_steps - 1):
+                e = np.random.normal()
+                s_T *= np.exp(
+                    (self.r - 0.5 * (self.sigma ** 2)) * dt +
+                    self.sigma * e * np.sqrt(dt)
+                    )
+                call[n] = max(s_T - self.X, 0)
+
+        call_price = call.mean() * np.exp(-self.r * self.T)
+
+        return call_price
