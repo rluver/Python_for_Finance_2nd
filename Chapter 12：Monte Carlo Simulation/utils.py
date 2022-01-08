@@ -175,19 +175,34 @@ class BlackScholesMerton:
         self.n_steps = n_steps
         self.n_simulations = n_simulations
 
-    def get_estimated_call_price(self) -> float:
+    def get_estimated_call_price(self, average_price: bool = False) -> float:
         dt = self.T / self.n_steps
         call = np.zeros(self.n_simulations)
 
         for n in tqdm(range(self.n_simulations)):
             s_T = self.S0
-            for _ in range(self.n_steps - 1):
-                e = np.random.normal()
-                s_T *= np.exp(
-                    (self.r - 0.5 * (self.sigma ** 2)) * dt +
-                    self.sigma * e * np.sqrt(dt)
-                    )
-                call[n] = max(s_T - self.X, 0)
+            total = 0  # only used when averaged_price is True
+
+            if average_price is False:
+                for _ in range(self.n_steps - 1):
+                    e = np.random.normal()
+                    s_T *= np.exp(
+                        (self.r - 0.5 * (self.sigma ** 2)) * dt +
+                        self.sigma * e * np.sqrt(dt)
+                        )
+
+                    call[n] = max(s_T - self.X, 0)
+
+            else:
+                for _ in range(self.n_steps - 1):
+                    e = np.random.normal()
+                    s_T *= np.exp(
+                        (self.r - 0.5 * (self.sigma ** 2)) * dt +
+                        self.sigma * e * np.sqrt(dt)
+                        )
+                    total += s_T
+                    price_average = total / self.n_steps
+                call[n] = max(price_average - self.X, 0)
 
         call_price = call.mean() * np.exp(-self.r * self.T)
 
